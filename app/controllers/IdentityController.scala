@@ -4,6 +4,8 @@ import database.PostgreSQLService
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
+import models.UserInfoWithCredentials
+import scala.concurrent.Future
 
 class IdentityController(
   val controllerComponents: ControllerComponents,
@@ -20,7 +22,27 @@ class IdentityController(
       }
   }
 
-  def signup(): Action[AnyContent] = ???
+  def signup(): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] => //Should be Action[UserInfoWithCredentials]
+    val jsonBody = request.body.asJson
+
+    val username: Option[String] = jsonBody.map(json => (json \ "username").as[String])
+    val password: Option[String] = jsonBody.map(json => (json \ "password").as[String])
+    val gender: Option[String] = jsonBody.map(json => (json \ "gender").as[String])
+    val age: Option[Int] = jsonBody.map(json => (json \ "age").as[Int])
+
+    if (username.isEmpty || password.isEmpty)
+      Future(BadRequest(views.html.index(s"Empty username or password")))
+    else{
+      postgreSQLService
+      .addUser(UserInfoWithCredentials(username.get, password.get, gender, age))
+      .map(_ match {
+        case Right(_) => Ok(views.html.index(s"User $username has been registered")) // Maybe generate a token here
+        case Left(e)  => BadRequest(views.html.index(s"User $username already exists. ErrorMsg: ${e.getMessage()}"))
+      })
+
+    }
+    
+    }
 
   def login(): Action[AnyContent] = ???
 

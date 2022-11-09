@@ -14,6 +14,10 @@ trait Settings {
 
   }
 
+  object secrets {
+    val salt = configuration.get[String]("app.secrets.salt")
+  }
+
 }
 
 class AppSettings(val configuration: Configuration) extends Settings
