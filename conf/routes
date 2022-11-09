@@ -1,0 +1,12 @@
+# An example controller showing a sample home page
+GET         /                          controllers.IdentityController.index()
+
+POST        /identity/signup           controllers.IdentityController.signup()
+
+POST        /identity/login            controllers.IdentityController.login()
+
+GET         /identity/user-info        controllers.IdentityController.userInfo()
+
+GET         /management/users          controllers.UserManagementController.users()
+
+

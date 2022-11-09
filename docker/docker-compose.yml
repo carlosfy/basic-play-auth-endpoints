@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+
+  postgresql:
+    image: postgres:12-alpine
+    container_name: reachfive_postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: reachfive_training
+      POSTGRES_USER: reachfive
+      POSTGRES_PASSWORD: changeme
+    volumes:
+      - ${PWD}/data/postgresql/logs:/var/log/postgresql
+      - ${PWD}/data/postgresql/data:/var/lib/postgresql/data
+    command: [ 'postgres', '-c', 'log_statement=all' ]
