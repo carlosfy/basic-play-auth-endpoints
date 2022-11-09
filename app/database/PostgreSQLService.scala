@@ -11,6 +11,7 @@ import settings.AppSettings
 import cats.MonadError
 import models.{UserInfoWithCredentials, Credentials}
 import org.slf4j.{Logger, LoggerFactory}
+import models.UserInfo
 
 class PostgreSQLService(
   implicit ec: ExecutionContext,
@@ -57,6 +58,11 @@ class PostgreSQLService(
   def getPasswordHash(credentials: Credentials): Future[Option[Int]] = 
     PostgreSQLQueries
       .getPassWordHash(credentials.username)
+      .transact(xa).unsafeToFuture()
+
+  def getUserInfo(username: String): Future[Option[UserInfo]] = 
+    PostgreSQLQueries
+      .getUser(username)
       .transact(xa).unsafeToFuture()
 
 

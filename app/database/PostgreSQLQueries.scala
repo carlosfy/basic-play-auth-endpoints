@@ -2,6 +2,7 @@ package database
 
 import doobie._
 import doobie.implicits._
+import models.UserInfo
 
 object PostgreSQLQueries {
 
@@ -28,5 +29,15 @@ object PostgreSQLQueries {
     |FROM users 
     |WHERE username = $username
     """".stripMargin.query[Int].option
+
+  def getUser(username: String): ConnectionIO[Option[UserInfo]] = 
+    sql"""
+    |SELECT username, gender, age
+    |FROM users 
+    |WHERE username = $username
+    """".stripMargin
+    .query[(String, Option[String], Option[Int])]
+    .option
+    .map(_.map(tri => UserInfo(tri._1, tri._2, tri._3)))
 
 }

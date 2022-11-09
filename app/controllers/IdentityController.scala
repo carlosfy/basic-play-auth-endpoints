@@ -8,6 +8,9 @@ import models.UserInfoWithCredentials
 import scala.concurrent.Future
 import models.Credentials
 
+import java.time.{LocalDateTime, ZoneOffset}
+
+
 class IdentityController(
   val controllerComponents: ControllerComponents,
   val postgreSQLService: PostgreSQLService,
@@ -63,9 +66,30 @@ class IdentityController(
         case _  => BadRequest(views.html.index(s"User or password incorrect"))
       })
 
-    }
-    
+    }}
+
+  def userInfo(): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] => 
+    authenticated { user => 
+      postgreSQLService
+        .getUserInfo(user)
+        .map{_ match {
+          case Some(userInfo) => Ok(views.html.index(userInfo.toString()))
+          case None           => Ok(views.html.index(s"Unregistered user: $user"))
+        }}
+      }
     }
 
-  def userInfo(): Action[AnyContent] = ???
+  private def getUser(req: RequestHeader): Option[String] = {
+    val requestToken = req.session.get("authentication")
+
+    requestToken
+      .flatMap(token => models.Session.getSession(token))
+      .filter(_.expiration.isAfter(LocalDateTime.now(ZoneOffset.UTC)))
+      .map(_.username)
+  }
+
+  private def authenticated(block: String => Future[Result])(implicit request: Request[AnyContent]): Future[Result] = 
+    getUser(request)
+      .map(block)
+      .getOrElse(Future(Unauthorized(views.html.index("Invalid token"))))
 }
