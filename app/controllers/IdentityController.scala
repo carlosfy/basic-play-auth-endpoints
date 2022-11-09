@@ -6,6 +6,7 @@ import play.api.mvc._
 import scala.concurrent.ExecutionContext
 import models.UserInfoWithCredentials
 import scala.concurrent.Future
+import models.Credentials
 
 class IdentityController(
   val controllerComponents: ControllerComponents,
@@ -44,7 +45,27 @@ class IdentityController(
     
     }
 
-  def login(): Action[AnyContent] = ???
+  def login(): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] => //Should be Action[UserInfoWithCredentials]
+    val jsonBody = request.body.asJson
+
+    val username: Option[String] = jsonBody.map(json => (json \ "username").as[String])
+    val password: Option[String] = jsonBody.map(json => (json \ "password").as[String])
+
+    if (username.isEmpty || password.isEmpty)
+      Future(BadRequest(views.html.index(s"Empty username or password")))
+    else{
+      postgreSQLService
+      .getPasswordHash(Credentials(username.get, password.get))
+      .map(_ match {
+        case Some(storedHash) if(password.get == storedHash) => 
+          val token = models.Session.createToken(username.get)
+          Ok(token) // return json: {"token": token}
+        case _  => BadRequest(views.html.index(s"User or password incorrect"))
+      })
+
+    }
+    
+    }
 
   def userInfo(): Action[AnyContent] = ???
 }

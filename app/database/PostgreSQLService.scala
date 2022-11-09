@@ -9,7 +9,7 @@ import cats.effect.unsafe.implicits.global
 import settings.AppSettings
 
 import cats.MonadError
-import models.UserInfoWithCredentials
+import models.{UserInfoWithCredentials, Credentials}
 import org.slf4j.{Logger, LoggerFactory}
 
 class PostgreSQLService(
@@ -53,6 +53,11 @@ class PostgreSQLService(
         ).run
         .map(_ => ()) 
         .transact(xa).unsafeToFuture()
+
+  def getPasswordHash(credentials: Credentials): Future[Option[Int]] = 
+    PostgreSQLQueries
+      .getPassWordHash(credentials.username)
+      .transact(xa).unsafeToFuture()
 
 
 }

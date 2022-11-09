@@ -22,4 +22,11 @@ object PostgreSQLQueries {
     |VALUES ($user, $passwordHash, $gender, $age)
     """".stripMargin.update
 
+  def getPassWordHash(username: String): ConnectionIO[Option[Int]] = 
+    sql"""
+    |SELECT password_hash 
+    |FROM users 
+    |WHERE username = $username
+    """".stripMargin.query[Int].option
+
 }
