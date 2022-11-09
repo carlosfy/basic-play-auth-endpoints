@@ -65,5 +65,9 @@ class PostgreSQLService(
       .getUser(username)
       .transact(xa).unsafeToFuture()
 
+  def getAllUsers(): Future[List[UserInfo]] = 
+    PostgreSQLQueries
+      .getAllUsers()
+      .transact(xa).unsafeToFuture()
 
 }

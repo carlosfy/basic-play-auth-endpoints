@@ -40,4 +40,13 @@ object PostgreSQLQueries {
     .option
     .map(_.map(tri => UserInfo(tri._1, tri._2, tri._3)))
 
+  def getAllUsers(): ConnectionIO[List[UserInfo]] = 
+    sql"""
+    |SELECT username
+    |FROM users
+    """".stripMargin
+    .query[(String, Option[String], Option[Int])]
+    .to[List]
+    .map(_.map(tri => UserInfo(tri._1, tri._2, tri._3)))
+
 }
