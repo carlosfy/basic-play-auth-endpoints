@@ -7,4 +7,5 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <include file="migrations/create-welcome-message-table.sql" relativeToChangelogFile="true"/>
+    <include file="migrations/create-user-table.sql" relativeToChangelogFile="true"/>
 </databaseChangeLog>
